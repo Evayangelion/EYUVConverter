@@ -110,3 +110,48 @@ void YUV420toYUV422(unsigned char *yuv420, unsigned char *yuv422, int Y_width, i
 	}
     
 }
+
+void YUV420toRGB(unsigned char *yuv420, unsigned char*rgb ,int width, int height) {
+    int Ylen = width * height;
+    unsigned char *p_Y420 = yuv420;
+    unsigned char *p_U420 = p_Y420 + Ylen;
+    unsigned char *p_V420 = p_U420 + Ylen / 4;
+    //int yIndex, uIndex, vIndex;
+    int rgbIndex = 0;
+    int R,G,B,Y,U,V;
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++){
+            Y = *(p_Y420 + y * width + x);
+            U = *(p_U420 + (y / 2) * (width / 2) + x / 2);
+            V = *(p_V420 + (y / 2) * (width / 2) + x / 2);
+            /* 在网络上搜索出的UV分量取值大多是 (y * width / 4) + x / 2这样
+               我认为写成(y / 2) * (width / 2) + x / 2可以帮助理解
+               原因如下:
+               1.因为是YUV420的采样方式，每2×2个y分量公用一个u/v分量
+                 也就是对于偶数i,共用一个ui/vi的y分量有:
+                 yi    yi+1
+                 yi+w  yi+w+1
+                 所以在y和x方向分别需要/2
+               2.width/2的原因是uv分量的行宽是y分量的一半
+                 y分量进入下一行需要+width个y分量
+                 那么uv分量进入下一行则需要+width/2个uv分量
+            */
+            R = Y + 1.402 * (V -128);
+            G = Y - 0.34414 * (U - 128) - 0.71414 * (V - 128);
+            B = Y + 1.772 * (U - 128);
+
+            R = R < 255 ? R : 255;
+			G = G < 255 ? G : 255;
+			B = B < 255 ? B : 255;
+
+			R = R < 0 ? 0 : R;
+			G = G < 0 ? 0 : G;
+			B = B < 0 ? 0 : B;
+
+            *(rgb + rgbIndex++) = R;
+            *(rgb + rgbIndex++) = G;
+            *(rgb + rgbIndex++) = B;
+        }
+    }
+    
+}

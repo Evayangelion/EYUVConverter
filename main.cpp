@@ -8,24 +8,31 @@ int main(int argc, char** argv) {
     char *infile_name, *outfile_name;
     int width, height, inframesize, outframesize; 
     unsigned char *ptrbufinframe, *ptrbufoutframe;
- 
+
 
     /*
     infile_name     = "stefan_cif.yuv";
     outfile_name     = "out_yu16_new_UV.yuv";
     */
-    infile_name = "out_yu16_new_UV.yuv";
-    outfile_name = "420out.yuv";
+    infile_name = "stefan_cif(I420-YUV420P).yuv";
+    outfile_name = "420toRGB.txt";
 
     width              = 352;
     height             = 288;
 
-    /*
+    /*420->422
     inframesize = width * height * 3 / 2;
     outframesize = width * height * 2;
     */
+
+    /*422->420
     inframesize = width * height *  2;
     outframesize = width * height * 3 / 2;
+    */
+
+    /*420->rgb888*/
+    inframesize = width * height *  3 / 2;
+    outframesize = width * height * 3;
     
     infile  = fopen(infile_name, "rb");
     outfile = fopen(outfile_name, "wb");
@@ -51,7 +58,8 @@ int main(int argc, char** argv) {
 
     while (!feof(infile))
     {
-        YUV422toYUV420(ptrbufinframe, ptrbufoutframe, width, height);
+        //YUV422toYUV420(ptrbufinframe, ptrbufoutframe, width, height);
+        YUV420toRGB(ptrbufinframe, ptrbufoutframe, width, height);
         fwrite(ptrbufoutframe, 1, outframesize, outfile);
         fread(ptrbufinframe, 1, inframesize, infile);
     }
